@@ -111,14 +111,48 @@ const Modal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) =>
     };
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const params = new URLSearchParams(window.location.search);
+    const utmData: Record<string, string> = {};
+    const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'placement', 'utm_adgroup', 'matchtype', 'utm_device'];
+    keys.forEach(key => {
+      utmData[key] = params.get(key) || '';
+    });
+
+    const submissionData = {
+      ...formData,
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString(),
+      ...utmData
+    };
+
     // Push to dataLayer
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: 'form_submit_success',
-      form_data: formData
+      form_data: submissionData
     });
+
+    try {
+      const webhookUrl = import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK || "https://script.google.com/macros/s/AKfycbwW1mWRJji4j4bnqLa90hU79DkI-9XnKCvDHyT7EeIbs9cPVnvWHPm1nx3_rOFkHBpu/exec";
+      if (webhookUrl) {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submissionData)
+        });
+      } else {
+        console.log("Form submission data (Webhook URL not set):", submissionData);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+
     setIsSubmitted(true);
     setTimeout(() => {
       setIsSubmitted(false);
@@ -671,8 +705,8 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-10 border-t border-slate-800 pb-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <img src="https://www.uscaacademy.com/wp-content/uploads/2026/02/USCA-Academy-Logo.png" alt="USCA Academy Logo" className="w-auto h-8 object-contain brightness-0 invert opacity-80" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+          <div className="flex items-center gap-3">
+            <img src="https://www.uscaacademy.com/wp-content/uploads/2026/02/USCA-Academy-Logo.png" alt="USCA Academy Logo" className="w-auto h-10 object-contain bg-white/95 px-3 py-1.5 rounded-lg" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
             <span className="text-xl font-bold text-slate-300">USCA Academy</span>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-6 text-sm">
@@ -687,7 +721,7 @@ export default function App() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Sticky CTAs */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex flex-row justify-center items-center gap-3 sm:gap-6">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex md:hidden flex-row justify-center items-center gap-3 sm:gap-6">
         <div className="text-center flex-1 max-w-[250px]">
           <Button onClick={openModal} className="px-2 sm:px-8 py-2.5 sm:py-3 w-full text-xs sm:text-base">Secure Your Spot</Button>
           <p className="text-[10px] sm:text-xs text-gray-500 mt-1 font-medium leading-tight">Limited seats available.</p>
