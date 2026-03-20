@@ -325,7 +325,7 @@ export default function App() {
             <span className="text-2xl font-bold text-blue-800 tracking-tight hidden sm:block">USCA Academy</span>
           </div>
           <div className="flex items-center gap-4 md:gap-6">
-            <Button onClick={openModal} className="hidden md:flex px-6 py-2.5 text-sm">Book Tour</Button>
+            <Button onClick={openModal} className="hidden md:flex px-6 py-2.5 text-sm">Book Free Tour</Button>
             <a 
               href="https://wa.me/19052320411?text=I%20am%20interested%20in%20USCA%20Academy%27s%20Primary%20School%20Program" 
               target="_blank" 
@@ -624,7 +624,7 @@ export default function App() {
                   </li>
                 ))}
               </ul>
-              <Button onClick={openModal} className="w-full py-4 text-lg">Book a Tour</Button>
+              <Button onClick={openModal} className="w-full py-4 text-lg">Book Free Tour</Button>
               <p className="text-center text-sm text-gray-500 mt-4 font-medium">Spots fill up fast. Reserve yours before the next intake.</p>
             </div>
 
